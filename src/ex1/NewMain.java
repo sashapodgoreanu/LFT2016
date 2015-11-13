@@ -5,6 +5,8 @@
  */
 package ex1;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Alexandru Podgoreanu
@@ -15,7 +17,14 @@ public class NewMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        CostantiNumericheConSpazi.scan("111 123 123.5 .567 +7.5 -.7 67e10 1e-2 -.7e2");
+       EpsilonNFA.scan("aab");
+       ArrayList<Integer> a = new ArrayList<Integer>();
+       a.add(1);
+       a.add(2);
+       a.add(3);
+       System.out.println(a.toString());
+       a.remove(a.indexOf(1));
+       System.out.println(a.toString());
     }
     
 }
