@@ -15,7 +15,7 @@ public class NewMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println(TreZeriNonCons.scan("1"));
+        CostantiNumericheConSpazi.scan("111 123 123.5 .567 +7.5 -.7 67e10 1e-2 -.7e2");
     }
     
 }

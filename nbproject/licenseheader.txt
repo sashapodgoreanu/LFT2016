@@ -1,0 +1,8 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}Universita degli Studi di Torino
+${licensePrefix}Dipartimento di Informatica
+<#if licenseLast??>
+${licenseLast}
+</#if>
