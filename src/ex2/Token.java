@@ -1,14 +1,22 @@
 package ex2;
 
 /**
- * Questa classe definisce i token della grammatica del linguaggio. Un token e'
- * un simbolo del linguaggio, un carattere.
+ * Un Token e una coppia costituita da un nome e un valore di un attributo opzionale
+ * Il nome del token è un simbolo astratto che rappresenta uno specifico tipo di unita lessicale. 
+ * Pe esempio una particolare parola chiave oppure una sequenza di caratteri che denota un identificatore
+ * 
+ * Una lessema e un'instanza di un token
+ * Per esempio:
+ * per il Token <ID> corrispondono i lessemi: pi, score, D2
+ * per il Token <NUMBER> corrispondono i lessemi: 3.12, 345, 0.54
+ *
  * @see Grammatica
  * @author UNITO
  */
 public class Token {
+
     /**
-     * tag e' un simbolo della grammatica
+     * tag e' il nome del token
      */
     public final int tag;
 
@@ -17,10 +25,10 @@ public class Token {
     }
 
     public String toString() {
-        return "<" + tag + ">";
+        return "<" + tag +", '"+ (char) tag+"'>";
     }
     /**
-     * Definisce i token della grammatica
+     * Definisce le lessemi della grammatica
      */
     public static final Token comma = new Token(','),
             colon = new Token(':'),

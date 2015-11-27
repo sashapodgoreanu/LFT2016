@@ -20,6 +20,15 @@ public class Lexer {
         reserve(new Word(Tag.VAR, "var"));
         reserve(new Word(Tag.BOOLEAN, "boolean"));
         reserve(new Word(Tag.INTEGER, "integer"));
+        reserve(new Word(Tag.FALSE, "false"));
+        reserve(new Word(Tag.TRUE, "true"));
+        reserve(new Word(Tag.PRINT, "print"));
+        reserve(new Word(Tag.IF, "if"));
+        reserve(new Word(Tag.THEN, "then"));
+        reserve(new Word(Tag.ELSE, "else"));
+        reserve(new Word(Tag.WHILE, "while"));
+        reserve(new Word(Tag.BEGIN, "begin"));
+        reserve(new Word(Tag.END, "end"));
     }
 
     /**
@@ -37,6 +46,7 @@ public class Lexer {
     private void readch() {
         try {
             peek = (char) System.in.read();
+            System.out.println("Reading: " + peek);
         } catch (IOException exc) {
             peek = (char) -1; // ERROR
         }
@@ -44,6 +54,7 @@ public class Lexer {
 
     /**
      * Questa funzione legge una sequenza di caratteri e restituisce un Token,
+     *
      * @return un Token della grammatica.
      * @see Grammatica
      */
@@ -54,13 +65,38 @@ public class Lexer {
             }
             readch();
         }
-
+        /**
+         * Casi per i Token che hanno solo 1 carattere
+         */
         switch (peek) {
             case ',':
-                peek = ' ';
+                peek = ' ';//consume the character
                 return Token.comma;
-
-			// ... gestire gli altri casi ... //
+            case ';':
+                peek = ' ';
+                return Token.semicolon;
+            case '(':
+                peek = ' ';
+                return Token.lpar;
+            case ')':
+                peek = ' ';
+                return Token.rpar;
+            case '+':
+                peek = ' ';
+                return Token.plus;
+            case '-':
+                peek = ' ';
+                return Token.minus;
+            case '*':
+                peek = ' ';
+                return Token.mult;
+            case '/':
+                peek = ' ';
+                return Token.div;
+            /**
+             * Casi per i Token che hanno 1 o piu caratteri
+             */
+            //&&
             case '&':
                 readch();
                 if (peek == '&') {
@@ -71,8 +107,60 @@ public class Lexer {
                             + " after & : " + peek);
                     return null;
                 }
+            // ||
+            case '|':
+                readch();
+                if (peek == '|') {
+                    peek = ' ';
+                    return Word.or;
+                } else {
+                    System.err.println("Erroneous character"
+                            + " after | : " + peek);
+                    return null;
+                }
+            case '=':
+                readch();
+                if (peek == '=') {
+                    peek = ' ';
+                    return Word.eq;
+                } else {
+                    System.err.println("Erroneous character"
+                            + " after = : " + peek);
+                    return null;
+                }
+            case '<':
+                readch();
+                // <=
+                if (peek == '=') {
+                    peek = ' ';//consume the character
+                    return Word.le;
 
-			// ... gestire gli altri casi ... //
+                } else if (peek == '>') {// <>
+                    peek = ' ';//consume the character
+                    return Word.ne;
+                } else {// <
+                    return Token.lt;
+                }
+
+            case '>':
+                readch();
+                // >=
+                if (peek == '=') {
+                    peek = ' ';//consume the character
+                    return Word.ge;
+                } else {// >
+                    return Token.gt;
+                }
+            case ':':
+                readch();
+                // :=
+                if (peek == '=') {
+                    peek = ' ';//consume the character
+                    return Word.assign;
+                } else {// :
+                    return Token.colon;
+                }
+
             default:
                 if (Character.isLetter(peek)) {
                     String s = "";
@@ -81,6 +169,9 @@ public class Lexer {
                         readch();
                     } while (Character.isDigit(peek)
                             || Character.isLetter(peek));
+                    /**
+                     * Verifica se s e una lessema riservata
+                     */
                     if ((Word) words.get(s) != null) {
                         return (Word) words.get(s);
                     } else {
@@ -88,9 +179,30 @@ public class Lexer {
                         words.put(s, w);
                         return w;
                     }
-                } else {
+                } else if (Character.isDigit(peek)) {
+                    String s = "";
+                    /**
+                     * Lessema 0 e costituita da un solo carattere
+                     */
+                    if (peek == '0') {
+                        s += peek;
+                        readch();
+                        if (Character.isDigit(peek)) {
+                            System.err.println("Erroneous number format: "
+                                    + peek);
+                        }
+                    } else {
+                        do {
+                            s += peek;
+                            readch();
+                        } while (Character.isDigit(peek));
+                    }
 
-			// ... gestire il caso dei numeri ... //
+                    Word w = new Word(Tag.INTEGER, s);
+                    words.put(s, w);
+                    return w;
+
+                } else {
                     if (peek == '$') {
                         return new Token(Tag.EOF);
                     } else {
