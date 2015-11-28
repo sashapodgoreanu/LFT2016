@@ -73,9 +73,6 @@ public class Parser {
                 term();
                 exprp();
                 break;
-            case Tag.EOF:
-                match(Tag.EOF);
-                break;
         }
     }
 
@@ -96,15 +93,6 @@ public class Parser {
                 fact();
                 termp();
                 break;
-            case '+':
-                match('+');
-                break;
-            case '-':
-                match('-');
-                break;
-            case Tag.EOF:
-                match(Tag.EOF);
-                break;
         }
     }
 
@@ -113,20 +101,10 @@ public class Parser {
             case Tag.NUM:
                 match(Tag.NUM);
                 break;
-            case '*':
-                match('*');
-                break;
-            case '/':
-                match('*');
-                break;
-            case '+':
-                match('*');
-                break;
-            case '-':
-                match('*');
-                break;
-            case Tag.EOF:
-                match(Tag.EOF);
+            case '(':
+                match('(');
+                expr();
+                match(')');
                 break;
         }
     }
@@ -134,7 +112,7 @@ public class Parser {
     public static void main(String[] args) {
         Lexer lex = new Lexer();
         String filePath = new File("").getAbsolutePath();
-        String path = filePath + "\\program.txt"; // il percorso del file da leggere
+        String path = filePath + File.separator+ "program.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser parser = new Parser(lex, br);
