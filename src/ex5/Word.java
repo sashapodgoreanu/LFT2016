@@ -1,4 +1,4 @@
-package ex3;
+package ex5;
 
 /**
  * La classe Word estende la classe Token. Un Token e una coppia costituita da

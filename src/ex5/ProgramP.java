@@ -2,8 +2,9 @@
  * Universita degli Studi di Torino
  * Dipartimento di Informatica
  */
-package ex3;
+package ex5;
 
+import ex4.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -13,7 +14,7 @@ import java.io.IOException;
  *
  * @author Alexandru Podgoreanu
  */
-public class Parser {
+public class ProgramP {
 
     private Lexer lex;
     /**
@@ -21,8 +22,9 @@ public class Parser {
      */
     private Token look;
     private BufferedReader pbr;
+    private CodeGenerator code;
 
-    public Parser(Lexer l, BufferedReader br) {
+    public ProgramP(Lexer l, BufferedReader br) {
         lex = l;
         pbr = br;
         move();
@@ -73,6 +75,10 @@ public class Parser {
                 term();
                 exprp();
                 break;
+            case ')': break;
+            case Tag.EOF: break;
+            default: error("Expected '+' or '-'");
+
         }
     }
 
@@ -93,6 +99,15 @@ public class Parser {
                 fact();
                 termp();
                 break;
+            case '+':
+                break;
+            case '-':
+                break;
+            case ')':
+                break;
+            case Tag.EOF:
+                break;
+            default: error("Expected '*' or '/'");
         }
     }
 
@@ -112,10 +127,10 @@ public class Parser {
     public static void main(String[] args) {
         Lexer lex = new Lexer();
         String filePath = new File("").getAbsolutePath();
-        String path = filePath + File.separator+ "program.txt"; // il percorso del file da leggere
+        String path = filePath + File.separator + "program.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            Parser parser = new Parser(lex, br);
+            ProgramP parser = new ProgramP(lex, br);
             parser.start();
             br.close();
         } catch (IOException e) {

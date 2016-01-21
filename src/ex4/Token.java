@@ -1,4 +1,4 @@
-package ex3;
+package ex4;
 
 /**
  * Un Token e una coppia costituita da un nome e un valore di un attributo opzionale
