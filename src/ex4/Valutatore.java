@@ -86,9 +86,6 @@ public class Valutatore {
             case Tag.EOF:
                 exprp_val = exprp_i;
                 break;
-            //********************//
-            default:
-                error("Expected '+' or '-'");
 
         }
         return exprp_val;
@@ -134,9 +131,9 @@ public class Valutatore {
 
     private int fact() {
         int fact_val = 0;
-        Word ww = (Word) look;
         switch (look.tag) {
             case Tag.NUM:
+                Word ww = (Word) look;
                 System.out.println("look.tag = "+look.tag);
                 fact_val = Integer.parseInt(ww.lexeme);
                 match(Tag.NUM);

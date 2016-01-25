@@ -23,6 +23,7 @@ public class Tag {
             THEN = 273,
             ELSE = 274,
             WHILE = 275,
+            DO = 278,
             BEGIN = 276,
             END = 277;
 

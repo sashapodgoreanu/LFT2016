@@ -1,1 +1,13 @@
-1+2+3+4*10$
+integer a,b,c,d;
+boolean ba, bb;
+begin
+	a := 5;
+	b := 1;
+	if (a > b) then begin
+		print(9);
+	end;
+	
+	print(ba && ba || ba);
+end
+
+$

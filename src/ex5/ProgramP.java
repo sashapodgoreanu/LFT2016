@@ -8,8 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,11 +25,15 @@ public class ProgramP {
     private Token look;
     private BufferedReader pbr;
     private CodeGenerator code;
+    private SymbolTable st;
+    private int curent_adress;
 
-    public ProgramP(Lexer l, BufferedReader br, CodeGenerator c) {
+    public ProgramP(Lexer l, BufferedReader br, CodeGenerator c, SymbolTable st) {
         lex = l;
         pbr = br;
         code = c;
+        this.st = st;
+        curent_adress = 0;
         move();
     }
 
@@ -58,34 +61,212 @@ public class ProgramP {
     }
 
     public void prog() { // la procedura start puo‘ essere estesa (opzionale)
-        Type orE_tipo;
-        match(Tag.PRINT);
-        match('(');
-        orE_tipo = orE();
-        match(')');
-        match(Tag.EOF);
-        if (orE_tipo == Type.INTEGER) {
-            code.emit(OpCode.invokestatic, 1);
+        Integer[] avTags = new Integer[]{Tag.INTEGER, Tag.BOOLEAN, Tag.ID,
+            Tag.PRINT, Tag.BEGIN, Tag.WHILE, Tag.IF, Tag.EOF};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            declist();
+            stat();
+            match(Tag.EOF);
+            try {
+                code.toJasmin();
+            } catch (IOException ex) {
+                Logger.getLogger(ProgramP.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } else {
-            code.emit(OpCode.invokestatic, 0);
+            error("Syntax Error ");
         }
-        try {
-            code.toJasmin();
-        } catch (IOException ex) {
-            Logger.getLogger(ProgramP.class.getName()).log(Level.SEVERE, null, ex);
+    }
+
+    public void declist() {
+        if (look.tag == Tag.INTEGER || look.tag == Tag.BOOLEAN) {
+            dec();
+            match(';');
+            declist();
+        } else {
+            //*** EPSILON ***//
         }
+    }
+
+    public void dec() {
+        Integer[] avTags = new Integer[]{Tag.INTEGER, Tag.BOOLEAN};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            Type tipo = type();
+            if (look.tag == Tag.ID) {
+                Word ww = (Word) look;
+                st.insert(ww.lexeme, tipo, curent_adress++);
+                match(Tag.ID);
+                idlist(tipo);
+            }
+        } else {
+            error("Syntax Error ");
+        }
+    }
+
+    public Type type() {
+        Type tipo = null;
+        switch (look.tag) {
+            case Tag.INTEGER:
+                match(Tag.INTEGER);
+                tipo = Type.INTEGER;
+                break;
+            case Tag.BOOLEAN:
+                match(Tag.BOOLEAN);
+                tipo = Type.BOOLEAN;
+                break;
+            default:
+                error("Syntax Error ");
+                break;
+        }
+        return tipo;
+    }
+
+    public void idlist(Type it) {
+        if (look.tag == ',') {
+            match(',');
+            Word ww = (Word) look;
+            match(Tag.ID);
+            st.insert(ww.lexeme, it, curent_adress++);
+            idlist(it);
+        } else if (look.tag == ';') {
+            //*** EPSILON ***//
+        } else {
+            error("Syntax Error ");
+        }
+
+    }
+
+    public void stat() {
+        Type exp_tipo, tipo;
+        switch (look.tag) {
+            case (Tag.ID):
+                Word ww = (Word) look;
+                match(Tag.ID);
+                match(Tag.ASSIGN);
+                int address = st.lookupAddress(ww.lexeme);
+                tipo = st.lookupType(ww.lexeme);
+                exp_tipo = exp();
+                if (tipo == exp_tipo) {
+                    code.emit(OpCode.istore, address);
+                } else {
+                    error("Expected: " + tipo + ", found: " + exp_tipo);
+                }
+                break;
+            case (Tag.PRINT):
+                match(Tag.PRINT);
+                match('(');
+                exp_tipo = exp();
+                match(')');
+                if (exp_tipo == Type.INTEGER) {
+                    code.emit(OpCode.invokestatic, 1);
+                } else {
+                    code.emit(OpCode.invokestatic, 0);
+                }
+                break;
+            case (Tag.BEGIN):
+                match(Tag.BEGIN);
+                statlist();
+                match(Tag.END);
+                break;
+            case (Tag.IF):
+                match(Tag.IF);
+                tipo = exp();
+                if (tipo != Type.BOOLEAN) {
+                    error("Boolean expected");
+                }
+                int lif = code.newLabel();
+                code.emit(OpCode.ldc, 0);
+                code.emit(OpCode.if_icmpeq, lif);
+                match(Tag.THEN);
+                stat();
+                if (look.tag == Tag.ELSE) {
+                    match(Tag.ELSE);
+                    int lelse = code.newLabel();
+                    code.emit(OpCode.GOto, lelse);
+                    code.emitLabel(lif);
+                    stat();
+                    code.emitLabel(lelse);
+                } else {
+                    code.emitLabel(lif);
+                }
+
+                break;
+            case (Tag.WHILE):
+                match(Tag.WHILE);
+                int lwhile = code.newLabel();
+                code.emitLabel(lwhile);
+                tipo = exp();
+                if (tipo != Type.BOOLEAN) {
+                    error("Boolean expected");
+                }
+                code.emit(OpCode.ldc, 0);
+                int ldo = code.newLabel();
+                code.emit(OpCode.if_icmpeq, ldo);
+                match(Tag.DO);
+                stat();
+                code.emit(OpCode.GOto, lwhile);
+                code.emitLabel(ldo);
+                break;
+            default:
+                Integer[] avTags = new Integer[]{
+                    (int) ';',
+                    Tag.ELSE, Tag.EOF, Tag.END};
+                if (Arrays.asList(avTags).contains(look.tag)) {
+                    //*** EPSILON ***/
+                } else {
+                    error("Syntax error");
+                }
+                break;
+        }
+
+    }
+
+    public void statlist() {
+        Integer[] avTags = new Integer[]{Tag.ID, Tag.PRINT, Tag.BEGIN, Tag.WHILE, Tag.IF};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            stat();
+            statlist_p();
+        } else {
+            error("Syntax Error");
+        }
+    }
+
+    public void statlist_p() {
+        if (look.tag == ';') {
+            match(';');
+            stat();
+            statlist_p();
+        } else if (look.tag == Tag.END) {
+            //*** EPSILON ***// 
+        } else {
+            error("Syntax Error");
+        }
+    }
+
+    public Type exp() {
+        Integer[] avTags = new Integer[]{(int) '(', Tag.ID, Tag.NUM, Tag.TRUE, Tag.FALSE};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            return orE();
+        } else {
+            error("Syntax error");
+        }
+        return null;
     }
 
     public Type orE() {
         Type tipo = null, andE_tipo, orE_p_tipo;
-        andE_tipo = andE();
-        orE_p_tipo = orE_p();
-        if (andE_tipo == Type.INTEGER && (orE_p_tipo == null || orE_p_tipo == Type.INTEGER)) {
-            tipo = Type.INTEGER;
-        } else if (andE_tipo == Type.BOOLEAN && (orE_p_tipo == null || orE_p_tipo == Type.BOOLEAN)) {
-            tipo = Type.BOOLEAN;
+        Integer[] avTags = new Integer[]{(int) '(', Tag.ID, Tag.NUM, Tag.TRUE, Tag.FALSE};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            andE_tipo = andE();
+            orE_p_tipo = orE_p();
+            if (andE_tipo == Type.INTEGER && (orE_p_tipo == null || orE_p_tipo == Type.INTEGER)) {
+                tipo = Type.INTEGER;
+            } else if (andE_tipo == Type.BOOLEAN && (orE_p_tipo == null || orE_p_tipo == Type.BOOLEAN)) {
+                tipo = Type.BOOLEAN;
+            } else {
+                error("Type Error");
+            }
         } else {
-            error("Type Error");
+            error("Syntax Error");
         }
         return tipo;
     }
@@ -102,36 +283,56 @@ public class ProgramP {
             } else {
                 error("Expected Boolean");
             }
+        } else {
+            Integer[] avTags = new Integer[]{(int) ')', (int) ';', Tag.DO, Tag.THEN, Tag.ELSE, Tag.END, Tag.EOF};
+            if (!Arrays.asList(avTags).contains(look.tag)) {
+                System.out.println(look.tag);
+                System.out.println((int) ';');
+                error("Syntax error");
+            }
         }
         return tipo;
     }
 
     public Type andE() {
+
         Type tipo = null, relE_tipo, andE_p_tipo;
-        relE_tipo = relE();
-        andE_p_tipo = andE_p();
-        //*** Type cheking ***//
-        if (andE_p_tipo == null) {
-            tipo = relE_tipo;
-        } else if (relE_tipo == Type.BOOLEAN && andE_p_tipo == Type.BOOLEAN) {
-            tipo = Type.BOOLEAN;
+        Integer[] avTags = new Integer[]{(int) '(', Tag.ID, Tag.NUM, Tag.TRUE, Tag.FALSE};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            relE_tipo = relE();
+            andE_p_tipo = andE_p();
+            //*** Type cheking ***//
+            if (andE_p_tipo == null) {
+                tipo = relE_tipo;
+            } else if (relE_tipo == Type.BOOLEAN && andE_p_tipo == Type.BOOLEAN) {
+                tipo = Type.BOOLEAN;
+            } else {
+                error("Type error");
+            }
         } else {
-            error("Type error");
+            error("Syntax error");
         }
         return tipo;
     }
 
     public Type andE_p() {
         Type tipo = null, relE_tipo, andE_p_tipo;
-        if (look.tag == Tag.AND) {
-            match(Tag.AND);
-            relE_tipo = relE();
-            code.emit(OpCode.iand);
-            andE_p_tipo = andE_p();
-            if (relE_tipo == Type.BOOLEAN && (andE_p_tipo == null || andE_p_tipo == Type.BOOLEAN)) {
-                tipo = Type.BOOLEAN;
+        Integer[] avTags = new Integer[]{(int) ';', (int) ')', Tag.OR, Tag.DO, Tag.THEN, Tag.ELSE, Tag.EOF, Tag.END};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            if (look.tag == Tag.AND) {
+                match(Tag.AND);
+                relE_tipo = relE();
+                code.emit(OpCode.iand);
+                andE_p_tipo = andE_p();
+                if (relE_tipo == Type.BOOLEAN && (andE_p_tipo == null || andE_p_tipo == Type.BOOLEAN)) {
+                    tipo = Type.BOOLEAN;
+                } else {
+                    error("Expected Boolean");
+                }
+            } else if (Arrays.asList(avTags).contains(look.tag)) {
+                //*** EPSILON ***//
             } else {
-                error("Expected Boolean");
+                error("Syntax Error");
             }
         }
         return tipo;
@@ -139,15 +340,20 @@ public class ProgramP {
 
     public Type relE() {
         Type tipo = null, addE_tipo, relE_p_tipo;
-        addE_tipo = addE();
-        relE_p_tipo = relE_p();
-        //*** Type cheking ***//
-        if (relE_p_tipo == null) {
-            tipo = addE_tipo;
-        } else if (addE_tipo == Type.INTEGER) {
-            tipo = Type.BOOLEAN;
+        Integer[] avTags = new Integer[]{(int) '(', Tag.ID, Tag.NUM, Tag.TRUE, Tag.FALSE};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            addE_tipo = addE();
+            relE_p_tipo = relE_p();
+            //*** Type cheking ***//
+            if (relE_p_tipo == null) {
+                tipo = addE_tipo;
+            } else if (addE_tipo == Type.INTEGER) {
+                tipo = Type.BOOLEAN;
+            } else {
+                error("Integer expected");
+            }
         } else {
-            error("Integer expected");
+            error("Syntax Error");
         }
         return tipo;
     }
@@ -234,12 +440,19 @@ public class ProgramP {
                 code.emitLabel(lnext);
                 tipo = typecheck(addE_tipo);
                 break;
+            default:
+                Integer[] avTags = new Integer[]{(int) ';', (int) ')', Tag.OR, Tag.DO, Tag.THEN, Tag.ELSE, Tag.EOF, Tag.END, Tag.AND};
+                if (Arrays.asList(avTags).contains(look.tag)) {
+                    //*** EPSILON ***//
+                } else {
+                    error("Syntax Error");
+                }
         }
         return tipo;
     }
-    
-    private Type typecheck(Type a){
-    //*** type cheking ***//
+
+    private Type typecheck(Type a) {
+        //*** type cheking ***//
         if (a == Type.INTEGER) {
             return Type.INTEGER;
         } else {
@@ -250,29 +463,26 @@ public class ProgramP {
 
     public Type addE() {
         Type tipo = null, multE_tipo, addE_p_tipo;
-        multE_tipo = multE();
-        addE_p_tipo = addE_p();
-        //*** Type cheking ***//
-        if (addE_p_tipo == null) {
-            tipo = multE_tipo;
-        } else if (multE_tipo == Type.INTEGER) {
-            tipo = Type.INTEGER;
+        Integer[] avTags = new Integer[]{(int) '(', Tag.ID, Tag.NUM, Tag.TRUE, Tag.FALSE};
+        if (Arrays.asList(avTags).contains(look.tag)) {
+            multE_tipo = multE();
+            addE_p_tipo = addE_p();
+            //*** Type cheking ***//
+            if (addE_p_tipo == null) {
+                tipo = multE_tipo;
+            } else if (multE_tipo == Type.INTEGER) {
+                tipo = Type.INTEGER;
+            } else {
+                error("Integer expected");
+            }
         } else {
-            error("Integer expected");
+            error("Syntax Error");
         }
         return tipo;
     }
 
     public Type addE_p() {
         Type tipo = null, multE_tipo = null, addE_p_tipo;
-        //*** Caso Epsilon ***//
-        /*if (look.tag == '+' || look.tag == '-' || look.tag == Tag.EQ
-         || look.tag == Tag.NE || look.tag == Tag.GE || look.tag == '<'
-         || look.tag == '>' || look.tag == Tag.AND || look.tag == '('
-         || look.tag == Tag.NUM || look.tag == Tag.TRUE || look.tag == Tag.FALSE
-         || look.tag == ')') {
-         tipo = null;
-         } else {*/
         switch (look.tag) {
             case '+':
                 match('+');
@@ -288,7 +498,7 @@ public class ProgramP {
                 }
                 break;
             case '-':
-                match('/');
+                match('-');
                 multE_tipo = multE();
                 code.emit(OpCode.isub);
                 addE_p_tipo = addE_p();
@@ -300,12 +510,20 @@ public class ProgramP {
                     error("Integer expected");
                 }
                 break;
-        }
-        //}
+            default:
+                Integer[] avTags = new Integer[]{Tag.EQ, Tag.NE, Tag.LE, Tag.GE,
+                    (int) '<', (int) '>', (int) ')', (int) ';', Tag.AND, Tag.OR, Tag.DO, Tag.THEN, Tag.ELSE, Tag.EOF, Tag.END};
+                if (Arrays.asList(avTags).contains(look.tag)) {
+                    //*** Episoln ***//
+                } else {
+                    error("Syntax Error");
+                }
 
+                break;
+        }
         return tipo;
     }
-
+  TO DO
     public Type multE() {
         Type tipo = null, fact_tipo, multE_p_tipo;
         fact_tipo = fact();
@@ -365,11 +583,10 @@ public class ProgramP {
 
     public Type fact() {
         Type tipo = null;
-
-        
+        Word ww;
         switch (look.tag) {
             case Tag.NUM:
-                Word ww = (Word) look;
+                ww = (Word) look;
                 code.emit(OpCode.ldc, Integer.parseInt(ww.lexeme));
                 tipo = Type.INTEGER;
                 match(Tag.NUM);
@@ -386,92 +603,33 @@ public class ProgramP {
                 break;
             case '(':
                 match('(');
-                tipo = orE();
+                tipo = exp();
                 match(')');
+                break;
+            case Tag.ID:
+                //find in symboltable il  tipo del'ID
+                ww = (Word) look;
+                tipo = st.lookupType(ww.lexeme);
+                if (tipo == null) {
+                    error("Variable not defined");
+                } else {
+                    code.emit(OpCode.iload, st.lookupAddress(ww.lexeme));
+                    match(Tag.ID);
+                }
                 break;
         }
         return tipo;
     }
 
-    private void expr() { // la procedura expr puo‘ essere estesa (opzionale)
-        term();
-        exprp();
-    }
-
-    private void exprp() {
-        switch (look.tag) {
-            case '+':
-                match('+');
-                term();
-                exprp();
-                break;
-            case '-':
-                match('-');
-                term();
-                exprp();
-                break;
-            case ')':
-                break;
-            case Tag.EOF:
-                break;
-            default:
-                error("Expected '+' or '-'");
-
-        }
-    }
-
-    private void term() {
-        fact();
-        termp();
-    }
-
-    private void termp() {
-        switch (look.tag) {
-            case '*':
-                match('*');
-                fact();
-                termp();
-                break;
-            case '/':
-                match('/');
-                fact();
-                termp();
-                break;
-            case '+':
-                break;
-            case '-':
-                break;
-            case ')':
-                break;
-            case Tag.EOF:
-                break;
-            default:
-                error("Expected '*' or '/'");
-        }
-    }
-    /*
-     private void fact() {
-     switch (look.tag) {
-     case Tag.NUM:
-     match(Tag.NUM);
-     break;
-     case '(':
-     match('(');
-     expr();
-     match(')');
-     break;
-     }
-     }
-     */
-
     public static void main(String[] args) {
         Lexer lex = new Lexer();
         CodeGenerator c = new CodeGenerator();
+        SymbolTable st = new SymbolTable();
         String filePath = new File("").getAbsolutePath();
         String path = filePath + File.separator + "program.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            ProgramP parser = new ProgramP(lex, br, c);
+            ProgramP parser = new ProgramP(lex, br, c, st);
             parser.prog();
             br.close();
         } catch (IOException e) {

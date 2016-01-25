@@ -27,6 +27,7 @@ public class Lexer {
         reserve(new Word(Tag.THEN, "then"));
         reserve(new Word(Tag.ELSE, "else"));
         reserve(new Word(Tag.WHILE, "while"));
+        reserve(new Word(Tag.DO, "do"));
         reserve(new Word(Tag.BEGIN, "begin"));
         reserve(new Word(Tag.END, "end"));
     }
