@@ -1,13 +1,11 @@
-integer a,b,c,d;
-boolean ba, bb;
+integer a,b;
 begin
-	a := 5;
-	b := 1;
-	if (a > b) then begin
-		print(9);
-	end;
+a := 0;
+b := 1;
+	if( a < b) then
+	print(0)
+		else print(1)
 	
-	print(ba && ba || ba);
 end
 
 $

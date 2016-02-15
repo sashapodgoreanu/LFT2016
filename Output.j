@@ -34,13 +34,13 @@
 .method public static run()V
  .limit stack 1024
  .limit locals 256
- ldc 5
+ ldc 0
  istore 0
  ldc 1
  istore 1
  iload 0
  iload 1
- if_icmpgt L0
+ if_icmplt L0
  ldc 0
  goto L1
 L0:
@@ -48,15 +48,13 @@ L0:
 L1:
  ldc 0
  if_icmpeq L2
- ldc 9
+ ldc 0
  invokestatic Output/printInt(I)V
+ goto L3
 L2:
- iload 4
- iload 4
- iand 
- iload 4
- ior 
- invokestatic Output/printBool(I)V
+ ldc 1
+ invokestatic Output/printInt(I)V
+L3:
  return
 .end method
 
