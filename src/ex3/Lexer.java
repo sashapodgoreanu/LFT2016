@@ -170,9 +170,10 @@ public class Lexer {
                      */
                     String s = "";
                     int state = 0;
-                    //ciclo finchè sono in uno stato valido e non ho letto tutti i caratteri dell'input s
-                    //leggo un carattere in input
+                    //ciclo finchè sono in uno stato valido e non ho letto tutti i caratteri 
+                    //{'_' ,[0-9], [a-z], [A-Z]} dell'input s
                     do {
+                        //leggo un carattere in input
                         char ch = peek;
                         s += peek;
                         switch (state) {
@@ -224,24 +225,7 @@ public class Lexer {
                                 + peek);
                         return null;
                     }
-                } //if (Character.isLetter(peek)) {
-                //    String s = "";
-                //    do {
-                //        s += peek;
-                //        readch();
-                //    } while (Character.isDigit(peek)
-                //            || Character.isLetter(peek));
-                /**
-                 * Verifica se s e una lessema riservata
-                 */
-                //    if ((Word) words.get(s) != null) {
-                //        return (Word) words.get(s);
-                //    } else {
-                //        Word w = new Word(Tag.ID, s);
-                //        words.put(s, w);
-                //        return w;
-                //    }
-                //}
+                }
                 /**
                  * INTEGER
                  */
@@ -268,14 +252,12 @@ public class Lexer {
                     words.put(s, w);
                     return w;
 
+                } else if (peek == '$') {
+                    return new Token(Tag.EOF);
                 } else {
-                    if (peek == '$') {
-                        return new Token(Tag.EOF);
-                    } else {
-                        System.err.println("Erroneous character: "
-                                + peek);
-                        return null;
-                    }
+                    System.err.println("Erroneous character: "
+                            + peek);
+                    return null;
                 }
         }
     }
@@ -286,7 +268,7 @@ public class Lexer {
         String path = filePath + "\\program.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
-            
+
             Token tok;
             do {
                 tok = lex.lexical_scan(br);

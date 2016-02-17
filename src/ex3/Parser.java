@@ -52,13 +52,22 @@ public class Parser {
     }
 
     public void start() { // la procedura start puo‘ essere estesa (opzionale)
-        expr();
-        match(Tag.EOF);
+        if (look.tag == '(' || look.tag == Tag.NUM) {
+            expr();
+            match(Tag.EOF);
+        } else {
+            error("Syntax Error");
+        }
+
     }
 
     private void expr() { // la procedura expr puo‘ essere estesa (opzionale)
-        term();
-        exprp();
+        if (look.tag == '(' || look.tag == Tag.NUM) {
+            term();
+            exprp();
+        } else {
+            error("Syntax Error");
+        }
     }
 
     private void exprp() {
@@ -73,12 +82,22 @@ public class Parser {
                 term();
                 exprp();
                 break;
+            default: //CASO EPSILON
+                if (look.tag == ')' || look.tag == Tag.EOF) {
+                } else {
+                    error("Syntax error");
+                }
+
         }
     }
 
     private void term() {
-        fact();
-        termp();
+        if (look.tag == '(' || look.tag == Tag.NUM) {
+            fact();
+            termp();
+        } else {
+            error("Syntax Error");
+        }
     }
 
     private void termp() {
@@ -93,6 +112,12 @@ public class Parser {
                 fact();
                 termp();
                 break;
+            default:
+                if (look.tag == '+' || look.tag == '-' || look.tag == ')' || look.tag == Tag.EOF) {
+                    //CASO EPSILON
+                } else {
+                    error("Syntax Error");
+                }
         }
     }
 
@@ -112,7 +137,7 @@ public class Parser {
     public static void main(String[] args) {
         Lexer lex = new Lexer();
         String filePath = new File("").getAbsolutePath();
-        String path = filePath + File.separator+ "program.txt"; // il percorso del file da leggere
+        String path = filePath + File.separator + "program.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser parser = new Parser(lex, br);

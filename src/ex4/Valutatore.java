@@ -50,17 +50,25 @@ public class Valutatore {
 
     public void start() {
         int expr_val;
-        expr_val = expr();
-        match(Tag.EOF);
-        System.out.println(expr_val);
+        if (look.tag == '(' || look.tag == Tag.NUM) {
+            expr_val = expr();
+            match(Tag.EOF);
+            System.out.println(expr_val);
+        } else {
+            error("Syntax Error");
+        }
     }
 // la procedura start puo‘ essere estesa
 // come in Esercizio 3.1 (opzionale)
 
     private int expr() {
-        int term_val, exprp_val;
-        term_val = term();
-        exprp_val = exprp(term_val);
+        int term_val, exprp_val = 0;
+        if (look.tag == '(' || look.tag == Tag.NUM) {
+            term_val = term();
+            exprp_val = exprp(term_val);
+        } else {
+            error("Syntax Error");
+        }
         return exprp_val;
     }
 // la procedura expr puo‘ essere estesa
@@ -79,13 +87,12 @@ public class Valutatore {
                 term_val = term();
                 exprp_val = exprp(exprp_i - term_val);
                 break;
-            //*** Caso EPSILON ***//
-            case ')':
-                exprp_val = exprp_i;
-                break;
-            case Tag.EOF:
-                exprp_val = exprp_i;
-                break;
+            default: //CASO EPSILON
+                if (look.tag == ')' || look.tag == Tag.EOF) {
+                    exprp_val = exprp_i;
+                } else {
+                    error("Syntax error");
+                }
 
         }
         return exprp_val;
@@ -93,8 +100,12 @@ public class Valutatore {
 
     private int term() {
         int term_val = 0, fact_val;
-        fact_val = fact();
-        term_val = termp(fact_val);
+        if (look.tag == '(' || look.tag == Tag.NUM) {
+            fact_val = fact();
+            term_val = termp(fact_val);
+        } else {
+            error("Syntax Error");
+        }
         return term_val;
     }
 
@@ -111,19 +122,13 @@ public class Valutatore {
                 fact_val = fact();
                 termp_val = termp(termp_i * fact_val);
                 break;
-            //*** Caso EPSILON ***//
-            case '-':
-                termp_val = termp_i;
-                break;
-            case '+':
-                termp_val = termp_i;
-                break;
-            case ')':
-                termp_val = termp_i;
-                break;
-            case Tag.EOF:
-                termp_val = termp_i;
-                break;
+            default:
+                if (look.tag == '+' || look.tag == '-' || look.tag == ')' || look.tag == Tag.EOF) {
+                    //CASO EPSILON
+                    termp_val = termp_i;
+                } else {
+                    error("Syntax Error");
+                }
             //*** END Caso EPSILON ***//
         }
         return termp_val;
@@ -134,7 +139,7 @@ public class Valutatore {
         switch (look.tag) {
             case Tag.NUM:
                 Word ww = (Word) look;
-                System.out.println("look.tag = "+look.tag);
+                System.out.println("look.tag = " + look.tag);
                 fact_val = Integer.parseInt(ww.lexeme);
                 match(Tag.NUM);
         }

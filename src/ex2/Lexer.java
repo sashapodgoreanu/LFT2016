@@ -162,22 +162,69 @@ public class Lexer {
                 }
 
             default:
+                /**
+                 * ID
+                 */
                 if (Character.isLetter(peek) || peek == '_') {
-                    String s = "";
-                    do {
-                        s += peek;
-                        readch();
-                    } while (Character.isDigit(peek)
-                            || Character.isLetter(peek) || peek == '_');
                     /**
-                     * Verifica se s e una lessema riservata
+                     * Identificatore da costruire
                      */
-                    if ((Word) words.get(s) != null) {
-                        return (Word) words.get(s);
+                    String s = "";
+                    int state = 0;
+                    //ciclo finchè sono in uno stato valido e non ho letto tutti i caratteri 
+                    //{'_' ,[0-9], [a-z], [A-Z]} dell'input s
+                    do {
+                        //leggo un carattere in input
+                        char ch = peek;
+                        s += peek;
+                        switch (state) {
+                            //stato 0
+                            case 0:
+                                if (ch == '_') {
+                                    state = 1;
+                                } else if (Character.isLetter(ch)) {
+                                    state = 2;
+                                } else {
+                                    state = -1;     //altrimenti errore (stato -1)
+                                }
+                                break;
+
+                            //stato 1
+                            case 1:
+                                if (Character.isLetter(ch) || Character.isDigit(ch) || ch == '_') {
+                                    state = 2;
+                                } else {
+                                    state = -1;
+                                }
+                                break;
+
+                            //stato 2
+                            case 2:
+                                if (Character.isLetter(ch) || Character.isDigit(ch) || ch == '_') {
+                                    state = 2;
+                                } else {
+                                    state = -1;
+                                }
+                                break;
+
+                        }
+                        readch();
+                    } while (state >= 0 && Character.isLetter(peek) || Character.isDigit(peek) || peek == '_');
+                    if (state == 2) {
+                        /**
+                         * Verifica se s e una lessema riservata
+                         */
+                        if ((Word) words.get(s) != null) {
+                            return (Word) words.get(s);
+                        } else {
+                            Word w = new Word(Tag.ID, s);
+                            words.put(s, w);
+                            return w;
+                        }
                     } else {
-                        Word w = new Word(Tag.ID, s);
-                        words.put(s, w);
-                        return w;
+                        System.err.println("Erroneous ID: "
+                                + peek);
+                        return null;
                     }
                 } else if (Character.isDigit(peek)) {
                     String s = "";
