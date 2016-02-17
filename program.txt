@@ -2,10 +2,22 @@ integer a,b;
 begin
 a := 0;
 b := 1;
+while (a < b) do
+begin
+
 	if( a < b) then
-	print(0)
-		else print(1)
-	
+	begin
+		a := 0;
+		b := 0;
+	end
+	else 
+	begin
+		a := 0;
+		b := 0;
+	end
+	;
+	a := a+1;
+end
 end
 
 $

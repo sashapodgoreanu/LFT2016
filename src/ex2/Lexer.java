@@ -1,7 +1,7 @@
 package ex2;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Hashtable;
 
 public class Lexer {
 
@@ -13,7 +13,7 @@ public class Lexer {
      *
      */
     private char peek = ' ';
-
+    
     Hashtable<String, Word> words = new Hashtable<String, Word>();
 
     public Lexer() {
@@ -162,13 +162,13 @@ public class Lexer {
                 }
 
             default:
-                if (Character.isLetter(peek)) {
+                if (Character.isLetter(peek) || peek == '_') {
                     String s = "";
                     do {
                         s += peek;
                         readch();
                     } while (Character.isDigit(peek)
-                            || Character.isLetter(peek));
+                            || Character.isLetter(peek) || peek == '_');
                     /**
                      * Verifica se s e una lessema riservata
                      */

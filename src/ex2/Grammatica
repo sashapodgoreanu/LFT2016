@@ -1,6 +1,8 @@
 == Gramatica ==
 
-<prog>      ::= [<decl>;]*(stmt) EOF
+<prog>      ::=
+
+ [<decl>;]*(stmt) EOF
 
 <decl>      ::= var ID [,ID ]*:<type>
 

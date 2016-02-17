@@ -56,7 +56,7 @@ public class ProgramP {
                 move();
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "syntax error");
+            error(this.getClass().getEnclosingMethod() + "syntax error");
         }
     }
 
@@ -73,7 +73,7 @@ public class ProgramP {
                 Logger.getLogger(ProgramP.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error ");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error ");
         }
     }
 
@@ -98,7 +98,7 @@ public class ProgramP {
                 idlist(tipo);
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error ");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error ");
         }
     }
 
@@ -114,7 +114,7 @@ public class ProgramP {
                 tipo = Type.BOOLEAN;
                 break;
             default:
-                error(this.getClass().getEnclosingMethod()+ "Syntax Error ");
+                error(this.getClass().getEnclosingMethod() + "Syntax Error ");
                 break;
         }
         return tipo;
@@ -130,7 +130,7 @@ public class ProgramP {
         } else if (look.tag == ';') {
             //*** EPSILON ***//
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error ");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error ");
         }
 
     }
@@ -148,9 +148,9 @@ public class ProgramP {
                 if (tipo == exp_tipo) {
                     code.emit(OpCode.istore, address);
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Expected: " + tipo + ", found: " + exp_tipo);
+                    error(this.getClass().getEnclosingMethod() + "Expected: " + tipo + ", found: " + exp_tipo);
                 }
-             
+
                 break;
             case (Tag.PRINT):
                 match(Tag.PRINT);
@@ -172,7 +172,7 @@ public class ProgramP {
                 match(Tag.IF);
                 tipo = exp();
                 if (tipo != Type.BOOLEAN) {
-                    error(this.getClass().getEnclosingMethod()+ "Boolean expected");
+                    error(this.getClass().getEnclosingMethod() + "Boolean expected");
                 }
                 int lif = code.newLabel();
                 code.emit(OpCode.ldc, 0);
@@ -197,7 +197,7 @@ public class ProgramP {
                 code.emitLabel(lwhile);
                 tipo = exp();
                 if (tipo != Type.BOOLEAN) {
-                    error(this.getClass().getEnclosingMethod()+ "Boolean expected");
+                    error(this.getClass().getEnclosingMethod() + "Boolean expected");
                 }
                 code.emit(OpCode.ldc, 0);
                 int ldo = code.newLabel();
@@ -214,7 +214,7 @@ public class ProgramP {
                 if (Arrays.asList(avTags).contains(look.tag)) {
                     //*** EPSILON ***/
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Syntax error");
+                    error(this.getClass().getEnclosingMethod() + "Syntax error");
                 }
                 break;
         }
@@ -227,7 +227,7 @@ public class ProgramP {
             stat();
             statlist_p();
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error");
         }
     }
 
@@ -239,7 +239,7 @@ public class ProgramP {
         } else if (look.tag == Tag.END) {
             //*** EPSILON ***// 
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error");
         }
     }
 
@@ -248,7 +248,7 @@ public class ProgramP {
         if (Arrays.asList(avTags).contains(look.tag)) {
             return orE();
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax error");
+            error(this.getClass().getEnclosingMethod() + "Syntax error");
         }
         return null;
     }
@@ -264,10 +264,10 @@ public class ProgramP {
             } else if (andE_tipo == Type.BOOLEAN && (orE_p_tipo == null || orE_p_tipo == Type.BOOLEAN)) {
                 tipo = Type.BOOLEAN;
             } else {
-                error(this.getClass().getEnclosingMethod()+ "Type Error");
+                error(this.getClass().getEnclosingMethod() + "Type Error");
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error");
         }
         return tipo;
     }
@@ -282,14 +282,14 @@ public class ProgramP {
             if (andE_tipo == Type.BOOLEAN && (orE_p_tipo == null || orE_p_tipo == Type.BOOLEAN)) {
                 tipo = Type.BOOLEAN;
             } else {
-                error(this.getClass().getEnclosingMethod()+ "Expected Boolean");
+                error(this.getClass().getEnclosingMethod() + "Expected Boolean");
             }
         } else {
             Integer[] avTags = new Integer[]{(int) ')', (int) ';', Tag.DO, Tag.THEN, Tag.ELSE, Tag.END, Tag.EOF};
             if (!Arrays.asList(avTags).contains(look.tag)) {
                 System.out.println(look.tag);
                 System.out.println((int) ';');
-                error(this.getClass().getEnclosingMethod()+ "Syntax error");
+                error(this.getClass().getEnclosingMethod() + "Syntax error");
             }
         }
         return tipo;
@@ -308,10 +308,10 @@ public class ProgramP {
             } else if (relE_tipo == Type.BOOLEAN && andE_p_tipo == Type.BOOLEAN) {
                 tipo = Type.BOOLEAN;
             } else {
-                error(this.getClass().getEnclosingMethod()+ "Type error");
+                error(this.getClass().getEnclosingMethod() + "Type error");
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax error");
+            error(this.getClass().getEnclosingMethod() + "Syntax error");
         }
         return tipo;
     }
@@ -328,12 +328,12 @@ public class ProgramP {
                 if (relE_tipo == Type.BOOLEAN && (andE_p_tipo == null || andE_p_tipo == Type.BOOLEAN)) {
                     tipo = Type.BOOLEAN;
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Expected Boolean");
+                    error(this.getClass().getEnclosingMethod() + "Expected Boolean");
                 }
             } else if (Arrays.asList(avTags).contains(look.tag)) {
                 //*** EPSILON ***//
             } else {
-                error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+                error(this.getClass().getEnclosingMethod() + "Syntax Error");
             }
         }
         return tipo;
@@ -351,10 +351,10 @@ public class ProgramP {
             } else if (addE_tipo == Type.INTEGER) {
                 tipo = Type.BOOLEAN;
             } else {
-                error(this.getClass().getEnclosingMethod()+ "Integer expected");
+                error(this.getClass().getEnclosingMethod() + "Integer expected");
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error");
         }
         return tipo;
     }
@@ -446,7 +446,7 @@ public class ProgramP {
                 if (Arrays.asList(avTags).contains(look.tag)) {
                     //*** EPSILON ***//
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+                    error(this.getClass().getEnclosingMethod() + "Syntax Error");
                 }
         }
         return tipo;
@@ -457,7 +457,7 @@ public class ProgramP {
         if (a == Type.INTEGER) {
             return Type.INTEGER;
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Integer expected");
+            error(this.getClass().getEnclosingMethod() + "Integer expected");
         }
         return null;
     }
@@ -474,10 +474,10 @@ public class ProgramP {
             } else if (multE_tipo == Type.INTEGER) {
                 tipo = Type.INTEGER;
             } else {
-                error(this.getClass().getEnclosingMethod()+ "Integer expected");
+                error(this.getClass().getEnclosingMethod() + "Integer expected");
             }
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+            error(this.getClass().getEnclosingMethod() + "Syntax Error");
         }
         return tipo;
     }
@@ -495,7 +495,7 @@ public class ProgramP {
                         && (addE_p_tipo == Type.INTEGER || addE_p_tipo == null)) {
                     tipo = Type.INTEGER;
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Integer expected");
+                    error(this.getClass().getEnclosingMethod() + "Integer expected");
                 }
                 break;
             case '-':
@@ -508,7 +508,7 @@ public class ProgramP {
                         && (addE_p_tipo == Type.INTEGER || addE_p_tipo == null)) {
                     tipo = Type.INTEGER;
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Integer expected");
+                    error(this.getClass().getEnclosingMethod() + "Integer expected");
                 }
                 break;
             default:
@@ -517,14 +517,16 @@ public class ProgramP {
                 if (Arrays.asList(avTags).contains(look.tag)) {
                     //*** Episoln ***//
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Syntax Error");
+                    error(this.getClass().getEnclosingMethod() + "Syntax Error");
                 }
 
                 break;
         }
         return tipo;
     }
-  //TO DO
+
+    //TO DO
+
     public Type multE() {
         Type tipo = null, fact_tipo, multE_p_tipo;
         fact_tipo = fact();
@@ -534,7 +536,7 @@ public class ProgramP {
         } else if (fact_tipo == Type.INTEGER) {
             tipo = Type.INTEGER;
         } else {
-            error(this.getClass().getEnclosingMethod()+ "Integer expected");
+            error(this.getClass().getEnclosingMethod() + "Integer expected");
         }
         return tipo;
     }
@@ -560,7 +562,7 @@ public class ProgramP {
                         && (multE_p_tipo == Type.INTEGER || multE_p_tipo == null)) {
                     tipo = Type.INTEGER;
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Integer expected");
+                    error(this.getClass().getEnclosingMethod() + "Integer expected");
                 }
                 break;
             case '/':
@@ -573,7 +575,7 @@ public class ProgramP {
                         && (multE_p_tipo == Type.INTEGER || multE_p_tipo == null)) {
                     tipo = Type.INTEGER;
                 } else {
-                    error(this.getClass().getEnclosingMethod()+ "Integer expected");
+                    error(this.getClass().getEnclosingMethod() + "Integer expected");
                 }
                 break;
         }
@@ -612,7 +614,7 @@ public class ProgramP {
                 ww = (Word) look;
                 tipo = st.lookupType(ww.lexeme);
                 if (tipo == null) {
-                    error(this.getClass().getEnclosingMethod()+ "Variable not defined");
+                    error(this.getClass().getEnclosingMethod() + "Variable not defined");
                 } else {
                     code.emit(OpCode.iload, st.lookupAddress(ww.lexeme));
                     match(Tag.ID);
