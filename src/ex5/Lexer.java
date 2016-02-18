@@ -228,6 +228,7 @@ public class Lexer {
                 } //if (Character.isLetter(peek)) {
                 //    String s = "";
                 //    do {
+                
                 //        s += peek;
                 //        readch();
                 //    } while (Character.isDigit(peek)

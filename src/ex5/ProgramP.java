@@ -60,7 +60,7 @@ public class ProgramP {
         }
     }
 
-    public void prog() { // la procedura start puo‘ essere estesa (opzionale)
+    public void prog() {
         Integer[] avTags = new Integer[]{Tag.INTEGER, Tag.BOOLEAN, Tag.ID,
             Tag.PRINT, Tag.BEGIN, Tag.WHILE, Tag.IF, Tag.EOF};
         if (Arrays.asList(avTags).contains(look.tag)) {
@@ -86,14 +86,18 @@ public class ProgramP {
             //*** EPSILON ***//
         }
     }
-
+    
+    /*
+    Declarazione delle variabili
+    */
     public void dec() {
         Integer[] avTags = new Integer[]{Tag.INTEGER, Tag.BOOLEAN};
         if (Arrays.asList(avTags).contains(look.tag)) {
-            Type tipo = type();
+            Type tipo = type(); //recupero il tipo
             if (look.tag == Tag.ID) {
                 Word ww = (Word) look;
-                st.insert(ww.lexeme, tipo, curent_adress++);
+                //aggiungo a symbol table riga: lessema, tipo, adress
+                st.insert(ww.lexeme, tipo, curent_adress++); 
                 match(Tag.ID);
                 idlist(tipo);
             }
@@ -101,7 +105,10 @@ public class ProgramP {
             error(this.getClass().getEnclosingMethod() + "Syntax Error ");
         }
     }
-
+    
+    /*
+    Tipo per la Declarazione delle variabili
+    */
     public Type type() {
         Type tipo = null;
         switch (look.tag) {
@@ -119,12 +126,16 @@ public class ProgramP {
         }
         return tipo;
     }
-
+    
+    /*
+    funzione aussiliaria per la Declarazione delle variabili
+    */
     public void idlist(Type it) {
         if (look.tag == ',') {
             match(',');
             Word ww = (Word) look;
             match(Tag.ID);
+            //aggiungo a symbol table riga: lessema, tipo, adress
             st.insert(ww.lexeme, it, curent_adress++);
             idlist(it);
         } else if (look.tag == ';') {
@@ -134,7 +145,7 @@ public class ProgramP {
         }
 
     }
-
+    
     public void stat() {
         Type exp_tipo, tipo;
         switch (look.tag) {
